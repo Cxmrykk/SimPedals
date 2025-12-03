@@ -13,9 +13,18 @@ There are two different types of pedal plates included. Printed and metal. If yo
 
 If you're planning to fold your own parts, you can just order 6x of the "3mm Pedal Base Plate" and ignore the "3mm Pedal Base Plate Mirrored" file as they are identical parts just folded the opposite direction. This will save you some money!
 
-I've not included any software yet but I will once I integrate the pedals, shifter and wheel all into one device.
-
 Link to video: https://youtu.be/44LWekyILmk
+
+#### Software
+After many requests, I've included software for the pedals to be used as a standalone device. Because my pedals are now attached to my steering wheel directly, I can't easily test this so I've had to include calibration code which is completely untested. The controller code itself should work and I'm fairly confident the calibration process will work, but let me know if you have issues and I should be able to fix them!
+
+Please note, this code will only work on one of the 32u4 based Arduino boards such as the Pro Mini or Leonardo.
+
+In order to compile the code, you will need to install the HX711 library into Arduino IDE. It should show up in the library manager as an option if you search for it, no need to add it manually.
+
+Once you've flashed the code to your arduino, you will need to open the serial monitor in arduino (ensure your Baud rate is set to 115200) and enter Y into the console to begin calibration. The calibration will run for 1 minute. Move all the pedals in and out to both extents during this period and the software will record and store the maximum and minimum values.
+
+You can repeat this process at any time if you move a sensor or otherwise change something that results in the need for a re-calibration.
 
 #### Bill of Materials
 
