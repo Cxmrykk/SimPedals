@@ -1,66 +1,104 @@
-// Metal Components/Steel Parts/3mm Angled Load Cell Bracket x1.scad
-// Thickness: 3mm
+/* 
+ * 3mm Angled Load Cell Bracket
+ * Converted from DXF to OpenSCAD
+ * 
+ * The outer profile is traced continuously along the provided lines and arcs 
+ * to guarantee a watertight, non-self-intersecting 2D polygon. This ensures 
+ * that boolean operations (like hole subtraction) execute flawlessly.
+ */
 
-$fn = 64; 
+// General rendering resolution
+$fn = 64;
 
-// Helper function to generate points along an arc
-function make_arc(x, y, r, a1, a2, steps=16) =
-    [for (i=[0:steps]) [
-        x + r*cos(a1 + (a2-a1)*i/steps),
-        y + r*sin(a1 + (a2-a1)*i/steps)
-    ]];
+// Material thickness specified in filename
+thickness = 3.0;
 
-module 3mm_Angled_Load_Cell_Bracket() {
-    
-    // Trace outer perimeter CCW combining straight line coordinates and mathematical arcs
-    pts = concat(
-        // Bottom Edge right-to-left
-        [[20.8803, 0], [24.5722, 0]],
-        [[25.5722, 1], [26.5722, 0]], // Relief cut
-        [[64.8426, 0]],
-        [[65.8426, 1], [66.8426, 0]], // Relief cut
-        [[70.5345, 0]],
+/**
+ * Helper function to generate an array of 2D points for an arc.
+ * Handles both forward and backward arc traversal smoothly.
+ */
+function make_arc(cx, cy, r, a1, a2) = 
+    let(
+        steps = max(4, ceil($fn * abs(a2 - a1) / 360)),
+        step_ang = (a2 - a1) / steps
+    )
+    [ for (i = [0 : steps]) [ cx + r * cos(a1 + i * step_ang), cy + r * sin(a1 + i * step_ang) ] ];
+
+/**
+ * Generates the 2D outer boundary polygon of the bracket.
+ * The sequence traces the perimeter clockwise/counter-clockwise,
+ * naturally forming straight connecting lines where endpoints differ.
+ */
+module bracket_profile() {
+    points = concat(
+        // Arc 148 (backward traversal)
+        make_arc(3.0, 15.0865482874, 3.0, 232.0, 149.7698776489),
         
-        // Right Side Complex
-        make_arc(70.5345, 10.0, 10.0, 270.0, 308.0),
-        make_arc(88.4148, 15.0865, 3.0, 308.0, 390.23), // 30.23 + 360 mapped
-        make_arc(84.1283, 22.4427, 3.0, 30.23, 120.23),
-        make_arc(70.2826, 21.3189, 3.0, 300.23, 230.23), // Reverse sweep
+        // Arc 149 (backward traversal)
+        make_arc(7.2865684576, 22.4427118760, 3.0, 149.7698776489, 59.7698776489),
         
-        // Top Edge left-to-right
-        [[67.1778, 20.0], [66.8426, 20.0]],
-        [[65.8426, 19.0], [64.8426, 20.0]], // Relief cut
-        [[26.5722, 20.0]],
-        [[25.5722, 19.0], [24.5722, 20.0]], // Relief cut
-        [[24.2370, 20.0], [23.0513, 19.0131]],
+        // Arc 14A (forward traversal)
+        make_arc(21.1322087809, 21.3189711744, 3.0, 239.7698776489, 309.7698776489),
         
-        // Left Side Complex
-        make_arc(21.1322, 21.3189, 3.0, 309.769, 239.769), // Reverse sweep
-        make_arc(7.2865, 22.4427, 3.0, 59.769, 149.769),
-        make_arc(2.9999, 15.0865, 3.0, 149.769, 232.0),
-        make_arc(20.8803, 10.0, 10.0, 232.0, 270.0)
+        // Top straight edge incorporating V-notches for folding relief
+        [
+            [24.2370935026, 20.0],
+            [24.5722703804, 20.0],
+            [25.5722703804, 19.0],
+            [26.5722703804, 20.0],
+            [64.8426241360, 20.0],
+            [65.8426241360, 19.0],
+            [66.8426241360, 20.0],
+            [67.1778010138, 20.0]
+        ],
+        
+        // Arc 143 (forward traversal)
+        make_arc(70.2826857355, 21.3189711744, 3.0, 230.2301223511, 300.2301223511),
+        
+        // Arc 144 (backward traversal)
+        make_arc(84.1283260588, 22.4427118760, 3.0, 120.2301223511, 30.2301223511),
+        
+        // Arc 145 (backward traversal crossing 0-degree mark, mapped to 390.23 deg)
+        make_arc(88.4148945164, 15.0865482874, 3.0, 390.2301223511, 308.0),
+        
+        // Arc 146 (backward traversal)
+        make_arc(70.5345248809, 10.0, 10.0, 308.0, 270.0),
+        
+        // Bottom straight edge incorporating V-notches for folding relief
+        [
+            [66.8426241360, 0.0],
+            [65.8426241360, 1.0],
+            [64.8426241360, 0.0],
+            [26.5722703804, 0.0],
+            [25.5722703804, 1.0],
+            [24.5722703804, 0.0],
+            [20.8803696355, 0.0]
+        ],
+        
+        // Arc 147 (backward traversal)
+        // Closing back onto the start of Arc 148 seamlessly.
+        make_arc(20.8803696355, 10.0, 10.0, 270.0, 232.0)
     );
+    
+    polygon(points);
+}
 
-    difference() {
-        // Base plate extrusion
-        linear_extrude(height = 3) {
-            difference() {
-                polygon(pts);
-                
-                // Mounting and clearance holes (Radius 2.5)
-                translate([85.0191, 14.6171]) circle(r = 2.5);
-                translate([6.3957, 14.6171]) circle(r = 2.5);
-                translate([45.7074, 10.0]) circle(r = 2.5);
-            }
+/**
+ * Main module: Extrudes the profile and cleanly subtracts the holes.
+ */
+module bracket_3d() {
+    linear_extrude(height = thickness, center = false, convexity = 4) {
+        difference() {
+            // Main Bracket Silhouette
+            bracket_profile();
+            
+            // Mounting Holes
+            translate([85.0191381936, 14.6171121125]) circle(r = 2.5);
+            translate([ 6.3957563228, 14.6171121125]) circle(r = 2.5);
+            translate([45.7074472582, 10.0000000000]) circle(r = 2.5);
         }
-        
-        // Visual fold scoring marks (subtracted 0.2mm into the top surface)
-        translate([25.5722, 10, 3 - 0.2])
-            cube([0.5, 17, 0.4], center=true);
-        translate([65.8426, 10, 3 - 0.2])
-            cube([0.5, 17, 0.4], center=true);
     }
 }
 
-// Render the part
-3mm_Angled_Load_Cell_Bracket();
+// Instantiate the final 3D part
+bracket_3d();
