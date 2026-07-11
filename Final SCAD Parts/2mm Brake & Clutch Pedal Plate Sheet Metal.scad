@@ -1,113 +1,119 @@
 // 2mm Brake & Clutch Pedal Plate Sheet Metal
-// Generated completely from DXF specifications
+// Refactored to use standard parameterized engineering dimensions
 
 $fn = 100;
 
-// Helper function to generate ordered points for an arc
-// Automatically handles angles wrapping past 360 degrees
-function arc_pts(cx, cy, r, start_a, end_a, steps=24) =
-    let(
-        end_a_c = end_a < start_a ? end_a + 360 : end_a,
-        step_a = (end_a_c - start_a) / steps
-    )
-    [ for (i = [0:steps]) 
-        [ cx + r * cos(start_a + i * step_a), cy + r * sin(start_a + i * step_a) ]
-    ];
+// --- CONFIGURATION VARIABLES ---
 
-module pedal_plate_2d() {
-    difference() {
-        // Outer Profile
-        // Formed precisely by the 4 corner arcs in the DXF file
-        hull() {
-            translate([7.993033, 34.353099]) circle(r=7.993094);
-            translate([42.007067, 34.353199]) circle(r=7.992994);
-            translate([42.006967, -35.018715]) circle(r=7.993094);
-            translate([7.992933, -35.018815]) circle(r=7.992994);
-        }
-        
-        // Circular Mounting Holes
-        translate([25.018584, -18.151597]) circle(r=2.251660);
-        translate([25.018717, 12.947430]) circle(r=2.251441);
-        
-        // Internal Slots (Cutouts)
-        // Reconstructed by concatenating arc segments in their natural CCW order. 
-        // Polygons will automatically close the shape with straight lines where connecting points meet.
-        
-        // Loop 1
-        polygon(concat(
-            arc_pts(17.230560, 20.616744, 2.221879, 224.467558, 2.050949),
-            arc_pts(16.989297, 20.673505, 2.461824, 0.529620, 42.693077),
-            arc_pts(9.220460, 28.814561, 2.221788, 44.432653, 182.997848),
-            arc_pts(9.450808, 28.700280, 2.449097, 180.044809, 222.777337)
-        ));
-        
-        // Loop 2
-        polygon(concat(
-            arc_pts(25.285451, -34.026489, 2.216966, 224.086280, 3.714520),
-            arc_pts(25.051302, -33.868771, 2.446499, 359.669987, 42.784323),
-            arc_pts(9.221382, -17.752593, 2.221828, 44.467667, 181.769385),
-            arc_pts(9.459819, -17.787825, 2.459431, 180.777426, 222.728413)
-        ));
-        
-        // Loop 3
-        polygon(concat(
-            arc_pts(40.785451, -34.026489, 2.216966, 224.086280, 3.714520),
-            arc_pts(40.551302, -33.868771, 2.446499, 359.669987, 42.784323),
-            arc_pts(32.769739, -25.783969, 2.222263, 44.488665, 182.398551),
-            arc_pts(33.016234, -25.866877, 2.466832, 180.234479, 222.629681)
-        ));
-        
-        // Loop 4
-        // Incorporates segmented inline line-points originating from split CAD references
-        polygon(concat(
-            arc_pts(17.231549, -10.368185, 2.220909, 224.405619, 1.490648),
-            arc_pts(17.021730, -10.366442, 2.430622, 1.320927, 43.022318),
-            [[10.806981, -0.739765], [10.246302, -0.332808]],
-            arc_pts(9.229794, -2.414086, 2.316582, 64.443210, 115.187831),
-            [[8.213853, -0.332808]],
-            arc_pts(9.264616, -2.339095, 2.264794, 117.642632, 179.144005),
-            arc_pts(9.451612, -2.238122, 2.452457, 181.568733, 222.834483)
-        ));
-        
-        // Loop 5
-        polygon(concat(
-            arc_pts(40.779578, -2.893183, 2.220691, 224.402388, 0.911932),
-            arc_pts(40.571383, -2.936862, 2.429889, 1.863644, 43.008657),
-            [[41.398806, -0.332808]],
-            arc_pts(32.768507, 5.178357, 2.220788, 44.404508, 181.136700),
-            arc_pts(32.980346, 5.205527, 2.433232, 181.677413, 223.016534),
-            [[35.091194, -0.332808]]
-        ));
-        
-        // Loop 6
-        polygon(concat(
-            arc_pts(20.204578, 33.360805, 2.216993, 44.088062, 183.713339),
-            arc_pts(20.437332, 33.202626, 2.445136, 179.657959, 222.796960),
-            arc_pts(40.778580, 12.588693, 2.221758, 224.467224, 1.412866),
-            arc_pts(40.543511, 12.596679, 2.456597, 1.091484, 42.771315)
-        ));
-        
-        // Loop 7
-        polygon(concat(
-            arc_pts(9.220347, 13.252378, 2.221033, 44.408628, 181.762391),
-            arc_pts(9.437238, 13.231363, 2.437332, 181.111788, 222.947876),
-            [[19.591194, -0.332808]],
-            arc_pts(40.779708, -18.444134, 2.221164, 224.410031, 2.122936),
-            arc_pts(40.559669, -18.395802, 2.439914, 0.797219, 42.906397),
-            [[25.898806, -0.332808]]
-        ));
-        
-        // Loop 8
-        polygon(concat(
-            arc_pts(35.704578, 33.360805, 2.216993, 44.088062, 183.713339),
-            arc_pts(35.937332, 33.202626, 2.445136, 179.657959, 222.796960),
-            arc_pts(40.778772, 28.054450, 2.222004, 224.466594, 2.658007),
-            arc_pts(40.536731, 28.159183, 2.461655, 359.960697, 42.666069)
-        ));
+// Basic dimensions
+plate_thickness = 2.0;
+pedal_width     = 50.0;
+corner_radius   = 8.0;
+
+// Outer Profile Alignment
+// Preserving the original global coordinate space for drop-in replacement compatibility
+offset_x = 8.0;
+cx_left  = offset_x;
+cx_right = offset_x + pedal_width - (2 * corner_radius); // 42.0
+cy_top   = 34.5;
+cy_bot   = -35.0;
+
+// Mounting Holes
+hole_radius = 2.25;  // 4.5mm diameter (standard M4 clearance)
+hole_x      = 25.0;  // Centered horizontally
+hole_y_top  = 13.0;
+hole_y_bot  = -18.0;
+
+// Diagonal Cutout Slots (45-degree angle)
+slot_radius    = 2.25;
+slot_margin    = 9.5;  // Uniform spacing from the outer boundaries
+slot_spacing   = 15.5; // Orthogonal spacing between parallel slots
+slot_base_c    = -8.5; // Starting constant for Y = -X + C 
+
+// Bounding box mapping for slot centers 
+// (Derived dynamically from outer shape minus the uniform slot margin)
+y_max_outer = cy_top + corner_radius; 
+y_min_outer = cy_bot - corner_radius; 
+slot_x_min  = offset_x - corner_radius + slot_margin; // 9.5
+slot_x_max  = cx_right + corner_radius - slot_margin; // 40.5
+slot_y_min  = y_min_outer + slot_margin;              // -33.5
+slot_y_max  = y_max_outer - slot_margin;              // 33.0
+
+// Keepout zone to prevent slots from cutting into mounting holes
+// Ensures a solid 3mm metal web between the hole and the slot (7.5 - 2.25 - 2.25 = 3mm)
+hole_keepout_x = 7.5; 
+
+
+// --- MODULES ---
+
+// Helper: Generates a single slot segment with fully rounded ends
+module draw_slot(x1, y1, x2, y2) {
+    hull() {
+        translate([x1, y1]) circle(r = slot_radius);
+        translate([x2, y2]) circle(r = slot_radius);
     }
 }
 
-// Extrude 2D pattern matching component sheet metal thickness (2mm)
-linear_extrude(height = 2.0) {
+// Helper: Programmatically generates the 45-degree diagonal pattern array
+module pattern_slots() {
+    // Generate the 6 diagonal line axes
+    for(i = [0 : 5]) {
+        // Line equation: Y = -X + C
+        c = slot_base_c + (i * slot_spacing);
+        
+        // Calculate bounded X coordinates using the Y limits
+        x_start = max(slot_x_min, c - slot_y_max);
+        x_end   = min(slot_x_max, c - slot_y_min);
+        
+        // Ensure line actually exists within the bounds
+        if (x_start < x_end) {
+            
+            // Check if this diagonal intersects our mounting holes (Indices 1 & 3)
+            is_hole_line = (i == 1 || i == 3);
+            
+            if (is_hole_line) {
+                // Split the line into two segments to leave solid material around the hole
+                gap_start = hole_x - hole_keepout_x;
+                gap_end   = hole_x + hole_keepout_x;
+                
+                if (x_start < gap_start) {
+                    draw_slot(x_start, c - x_start, gap_start, c - gap_start);
+                }
+                if (gap_end < x_end) {
+                    draw_slot(gap_end, c - gap_end, x_end, c - x_end);
+                }
+            } else {
+                // Draw uninterrupted slot segment
+                draw_slot(x_start, c - x_start, x_end, c - x_end);
+            }
+        }
+    }
+}
+
+// Main 2D Shape Assembly
+module pedal_plate_2d() {
+    difference() {
+        // 1. Outer Plate Profile
+        hull() {
+            translate([cx_left, cy_top]) circle(r = corner_radius);
+            translate([cx_right, cy_top]) circle(r = corner_radius);
+            translate([cx_right, cy_bot]) circle(r = corner_radius);
+            translate([cx_left, cy_bot]) circle(r = corner_radius);
+        }
+        
+        // 2. Circular Mounting Holes
+        translate([hole_x, hole_y_bot]) circle(r = hole_radius);
+        translate([hole_x, hole_y_top]) circle(r = hole_radius);
+        
+        // 3. Diagonal Cutout Array
+        pattern_slots();
+    }
+}
+
+
+// --- 3D OUTPUT EXTRUSION ---
+
+// Extrude the 2D logic to match the component sheet metal thickness
+linear_extrude(height = plate_thickness) {
     pedal_plate_2d();
 }
