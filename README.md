@@ -1,3 +1,8 @@
+# CNCDan's Sim Pedals MODIFIED (for 3D printing only)
+
+For those without access to a laser cutter, this repository aims to strengthen the existing parts for 3D printing only (compatibility is not guaranteed).
+
+````markdown
 # CNCDan - Sim Pedals
 A laser cut, 3D printed, hall effect and load cell compatible racing simulator pedal design.
 
@@ -67,3 +72,4 @@ You can repeat this process at any time if you move a sensor or otherwise change
 12x M5 Washers
 
 3x M6 Large Washers
+````
